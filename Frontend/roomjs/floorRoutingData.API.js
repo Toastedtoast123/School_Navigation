@@ -1,5 +1,5 @@
 (async function () {
-  const API_BASE = 'http://localhost:3001/api';
+  const API_BASE = 'https://school-navigation-volg.onrender.com/api';
 
   const FLOOR_DATA = {};
 
