@@ -233,7 +233,7 @@ nav ul li a:hover::after{
 .onboarding-modal{
   /* width: 50%; */
   max-height: 80%;
-  overflow:   scroll;
+  overflow:   hidden;
   border-radius: 18px;
   background: linear-gradient(180deg, rgba(18,18,22,0.98), rgba(18,18,22,0.9));
   border: 1px solid rgba(255,255,255,0.10);
