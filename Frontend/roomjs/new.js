@@ -448,7 +448,8 @@ function getConnectionPoint(roomId) {
   return null;
 }
 
-function buildMultiFloorGraph() {
+function buildMultiFloorGraph(direction) {
+  // direction: 'up' | 'down' | null (null = both, for single-floor searches)
   const mega = {};
 
   for (let f = 1; f <= 6; f++) {
@@ -459,25 +460,57 @@ function buildMultiFloorGraph() {
     }
   }
 
-  // Cross-floor stair connections (Floor numbers increase when going UP)
-  // Going UP:   F(n)_B2.up   → F(n+1)_B2.up1
+  // Cross-floor stair connections (floor numbers increase going UP).
+  // Going UP:   F(n)_B2.up   → F(n+1)_B2.up1   (delta +1)
   //             F(n)_B4.up   → F(n+1)_B4.up1
-  // Going DOWN: F(n)_B2.down → F(n-1)_B2.down1
+  // Going DOWN: F(n)_B2.down → F(n-1)_B2.down1  (delta -1)
   //             F(n)_B4.down → F(n-1)_B4.down1
-  // All links are bidirectional so BFS can travel both directions
-  const crossLinks = [
+  //
+  // Each link is one-directional: from → to only (no reverse).
+  // We only add the links that match the requested travel direction so BFS
+  // cannot accidentally use "up" stairs when the destination is below, or
+  // "down" stairs when the destination is above.
+  const upLinks   = [
     { from: 'B2.up',   to: 'B2.up1',   delta: +1 },
     { from: 'B4.up',   to: 'B4.up1',   delta: +1 },
+  ];
+  const downLinks = [
     { from: 'B2.down', to: 'B2.down1', delta: -1 },
     { from: 'B4.down', to: 'B4.down1', delta: -1 },
   ];
 
+  // Choose which cross-floor links to wire based on travel direction.
+  const crossLinks =
+    direction === 'up'   ? upLinks   :
+    direction === 'down' ? downLinks :
+    [...upLinks, ...downLinks];   // null / same-floor fallback
 
-  function megaLink(a, b) {
+  function megaLinkOneWay(a, b) {
     if (!mega[a]) mega[a] = [];
     if (!mega[b]) mega[b] = [];
     if (!mega[a].includes(b)) mega[a].push(b);
-    if (!mega[b].includes(a)) mega[b].push(a);
+    // intentionally NOT adding b→a so the stair is strictly directional
+  }
+
+  // Add intra-floor bridge links so BFS can continue through intermediate floors.
+  // When going UP:   landing (B2.up1) → departure (B2.up)  on the same floor
+  // When going DOWN: landing (B2.down1) → departure (B2.down) on the same floor
+  const intraLinks =
+    direction === 'up'   ? [{ landing: 'B2.up1', depart: 'B2.up' }, { landing: 'B4.up1', depart: 'B4.up' }] :
+    direction === 'down' ? [{ landing: 'B2.down1', depart: 'B2.down' }, { landing: 'B4.down1', depart: 'B4.down' }] :
+    [];
+
+  for (let f = 1; f <= 6; f++) {
+    for (const { landing, depart } of intraLinks) {
+      const landNode   = `F${f}_${landing}`;
+      const departNode = `F${f}_${depart}`;
+      const floorData  = (window.FLOOR_DATA || {})[f];
+      const landExists   = (mega[landNode]   !== undefined) || floorData?.connectionPoints?.[landNode];
+      const departExists = (mega[departNode] !== undefined) || floorData?.connectionPoints?.[departNode];
+      if (landExists && departExists) {
+        megaLinkOneWay(landNode, departNode);
+      }
+    }
   }
 
   for (let f = 1; f <= 6; f++) {
@@ -485,26 +518,64 @@ function buildMultiFloorGraph() {
       const destFloor = f + delta;
       if (destFloor < 1 || destFloor > 6) continue;
 
-      const nodeHere  = `F${f}_${from}`;
-      const nodeThere = `F${destFloor}_${to}`;
+      const nodeHere       = `F${f}_${from}`;
+      const thereFloorData = (window.FLOOR_DATA || {})[destFloor];
 
-      // Only link if both nodes exist
-      const hereExists  = (mega[nodeHere] !== undefined) || (window.FLOOR_DATA || {})[f]?.connectionPoints?.[nodeHere];
-      const thereExists = (mega[nodeThere] !== undefined) || (window.FLOOR_DATA || {})[destFloor]?.connectionPoints?.[nodeThere];
+      // Resolve the best landing node on the destination floor.
+      // Preference order:
+      //   1. The canonical landing name  (e.g. F2_B2.down1)
+      //   2. The same staircase, any node whose raw name starts with the
+      //      staircase prefix (B2 or B4) — catches floors that only have
+      //      e.g. B2.up / B2.up1 as their stair entry/exit point.
+      const staircasePrefix = from.split('.')[0]; // 'B2' or 'B4'
+      const primaryKey      = `F${destFloor}_${to}`;
 
-      if (hereExists && thereExists) {
-        megaLink(nodeHere, nodeThere);
+      const primaryExists =
+        (mega[primaryKey] !== undefined) ||
+        thereFloorData?.connectionPoints?.[primaryKey];
+
+      let nodeThere = null;
+      if (primaryExists) {
+        nodeThere = primaryKey;
+      } else {
+        // Scan destination floor's connectionPoints for any node belonging to
+        // the same staircase (B2.* or B4.*)
+        const cpKeys = Object.keys(thereFloorData?.connectionPoints || {});
+        const match  = cpKeys.find((k) => {
+          const raw = k.replace(/^F\d+_/, '');
+          return raw.startsWith(staircasePrefix + '.');
+        });
+        if (match) nodeThere = match;
+      }
+
+      if (!nodeThere) continue; // staircase truly absent on dest floor
+
+      // Only link if the origin node also exists
+      const hereExists =
+        (mega[nodeHere] !== undefined) ||
+        (window.FLOOR_DATA || {})[f]?.connectionPoints?.[nodeHere];
+
+      if (hereExists) {
+        megaLinkOneWay(nodeHere, nodeThere);
       }
     }
   }
-
 
   return mega;
 }
 
 function findMultiFloorPath(start, end) {
   if (start === end) return [start];
-  const mega = buildMultiFloorGraph();
+
+  // Determine travel direction so we only wire the correct stair nodes.
+  const startFloor = Number(start.match(/^F(\d+)_/)?.[1] || 0);
+  const endFloor   = Number(end.match(/^F(\d+)_/)?.[1]   || 0);
+  const direction  =
+    startFloor < endFloor ? 'up'   :
+    startFloor > endFloor ? 'down' :
+    null;  // same floor — no cross-floor links needed
+
+  const mega = buildMultiFloorGraph(direction);
   if (!mega[start] || !mega[end]) return null;
 
   const queue   = [[start, [start]]];
