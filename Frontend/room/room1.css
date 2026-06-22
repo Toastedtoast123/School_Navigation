@@ -373,7 +373,7 @@ h1 {
   box-shadow: 0 8px 18px rgba(44, 212, 217, 0.25);
 }
 
-@media (min-width: 601px) and (max-width: 1279px) {
+@media (min-width: 768px) and (max-width: 1279px) {
     nav ul {
         gap: 30px;
     }
@@ -401,7 +401,7 @@ h1 {
     }
     .controls-container {
         display: flex;
-        width: auto;
+        width: 70%;
         padding: 0.75rem;
         font-size: 16px;
         
@@ -609,7 +609,7 @@ h1 {
     }
 }
 
-@media (min-width: 300px) and (max-width: 600px) {
+@media (min-width: 375px) and (max-width: 600px) {
     nav {
         width: 98%;
     }
