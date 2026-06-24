@@ -24,7 +24,29 @@ app.use(
 );
 
 
-app.use(helmet());
+// Content-Security-Policy (CSP)
+// Adjust these directives to match where your app loads scripts/styles/images from.
+// If you use inline scripts/styles or external CDNs, you must allow them here.
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        // If your frontend is served from this same backend origin, this is usually enough.
+        'default-src': ["'self'"],
+        'script-src': ["'self'"],
+        'style-src': ["'self'"],
+        'img-src': ["'self'", 'data:'],
+        'connect-src': ["'self'"],
+        'font-src': ["'self'"],
+        'object-src': ["'none'"],
+        'base-uri': ["'self'"],
+        'frame-ancestors': ["'none'"],
+      },
+    },
+  })
+);
+
 
 // Prevent request body abuse (you mostly use GET)
 app.use(express.json({ limit: '100kb' }));
