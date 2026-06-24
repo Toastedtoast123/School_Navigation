@@ -1,7 +1,8 @@
 const express = require('express');
 const cors    = require('cors');
 const path    = require('path');
-const db      = require('./src/db/database');
+const helmet  = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 const roomsRouter  = require('./src/routes/rooms');
 const routeRouter  = require('./src/routes/route');
@@ -11,8 +12,43 @@ const app  = express();
 const PORT = process.env.PORT || 3001;
 
 // ── Middleware ──────────────────────────────────────────────────────────────
-app.use(cors());
-app.use(express.json());
+require('dotenv').config();
+
+const corsOrigin = process.env.CORS_ORIGIN || '*';
+app.use(
+  cors({
+    origin: corsOrigin === '' ? '*' : corsOrigin,
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'x-api-key'],
+  })
+);
+
+
+app.use(helmet());
+
+// Prevent request body abuse (you mostly use GET)
+app.use(express.json({ limit: '100kb' }));
+
+// Global rate limit (basic protection)
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 300,                // max requests per IP
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
+
+// Optional: stricter limiting on the expensive route calculations
+app.use(
+  '/api/route',
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
 
 // Serve your existing frontend files statically
 // Point this to the folder where your index.html, room1.html, etc. live
