@@ -29,10 +29,22 @@ app.use(
 // If you use inline scripts/styles or external CDNs, you must allow them here.
 app.use(
   helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+      useDefaults: false,
+      reportOnly: true, //For warns wont block
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc:  ["'self'"],
+        styleSrc:   ["'self'", "'unsafe-inline'"],
+        imgSrc:     ["'self'", "data:"],
+        connectSrc: ["'self'"],
+        fontSrc:    ["'self'"],
+        objectSrc:  ["'none'"],
+        frameSrc:   ["'none'"],
+      },
+    },
   })
 );
-
 
 // Prevent request body abuse (you mostly use GET)
 app.use(express.json({ limit: '100kb' }));
