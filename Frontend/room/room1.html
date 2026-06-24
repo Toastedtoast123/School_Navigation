@@ -20,13 +20,15 @@
                 <ul>
                     <li><label for="menu-toggle" class="close-btn">✕</label></li>
                     <li><a href="../../index.html">Home</a></li>
-                    <li><a href="room.html">Rooms</a></li>
+                    <li><a href="#">Rooms</a></li>
+                    <li><a href="../contact/contact.html">Contact</a></li>
                 </ul>
             </div>
         </nav>
     </header> 
     <section class="rooms-section">
         <div class="rooms-container">
+            <div id="viewer"></div>
             <div class="controls-container">
                 <div class="input">
                     <input type="text" id="fromInput" placeholder="Location" list="roomList">
@@ -42,7 +44,7 @@
                 <!-- floor buttons injected by ../roomjs/floorButtons.js -->
             </div>
             <div class="map-container">
-                <div id="viewer"></div>
+               
                 <button id="viewToggle" title="Switch to 2D view">
                   <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M480-80 120-280v-400l360-200 360 200v400L480-80Zm0-446 276-154-276-154-276 154 276 154Zm0 409 280-156v-322L480-439 200-595v322l280 156Zm0-409Zm0 322Zm0 0Z"/></svg>
                 </button>
