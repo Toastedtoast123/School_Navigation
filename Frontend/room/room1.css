@@ -340,7 +340,7 @@ a.floor-btn:focus,
 
 #viewToggle {
     position: absolute;
-    bottom: 17%;
+    bottom: 15%;
     right: 2%;
     z-index: 10;
     width: 44px;
