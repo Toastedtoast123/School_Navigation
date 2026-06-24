@@ -29,21 +29,7 @@ app.use(
 // If you use inline scripts/styles or external CDNs, you must allow them here.
 app.use(
   helmet({
-    contentSecurityPolicy: {
-      useDefaults: true,
-      directives: {
-        // If your frontend is served from this same backend origin, this is usually enough.
-        'default-src': ["'self'"],
-        'script-src': ["'self'"],
-        'style-src': ["'self'"],
-        'img-src': ["'self'", 'data:'],
-        'connect-src': ["'self'"],
-        'font-src': ["'self'"],
-        'object-src': ["'none'"],
-        'base-uri': ["'self'"],
-        'frame-ancestors': ["'none'"],
-      },
-    },
+    contentSecurityPolicy: false,
   })
 );
 
