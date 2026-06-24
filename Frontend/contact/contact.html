@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="contact.css">
+    <title>Document</title>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="container">
+                <a href="../../index.html" class="logo"><img id="logo" src="../images/img3.png" alt="error"></a>
+                <input type="checkbox" id="menu-toggle">
+                <label for="menu-toggle" class="hamburger">☰</label>
+                <ul>
+                    <li><label for="menu-toggle" class="close-btn">✕</label></li>
+                    <li><a href="../../index.html">Home</a></li>
+                    <li><a href="../room/room1.html">Rooms</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header> 
+     <section class="hero">
+            <div class="contact-container">
+                <form action="https://api.web3forms.com/submit" method="POST" class="contact-left">
+                    <div class="contact-left-title">
+                        <h2>Contact Us</h2>
+                        <hr>
+                    </div>
+                    <input type="hidden" name="access_key" value="d4773d81-5934-4f69-bed0-6558d045125d">
+                    <input type="text" name="name" placeholder="Your name" class="contact-inputs" required>
+                    <input type="email" name="email" placeholder="Your email" class="contact-inputs" required>
+                    <textarea name="message" placeholder="Your Massage" class="contact-inputs" required></textarea>
+                    <button type="submit">Submit</button>
+                    <p id="form-result" class="form-result"></p>
+                </form>
+            </div>
+
+        </section>
+
+        <script>
+            const contactForm = document.querySelector('.contact-left');
+            const formResult = document.getElementById('form-result');
+
+            contactForm.addEventListener('submit', function (e) {
+                e.preventDefault(); // stops the browser from navigating to web3forms
+
+                const formData = new FormData(contactForm);
+                const submitBtn = contactForm.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                formResult.textContent = 'Sending...';
+
+                fetch(contactForm.action, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json' },
+                    body: formData
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.success) {
+                            formResult.textContent = 'Message sent successfully!';
+                            contactForm.reset();
+                        } else {
+                            formResult.textContent = data.message || 'Something went wrong.';
+                        }
+                    })
+                    .catch(() => {
+                        formResult.textContent = 'Something went wrong. Please try again.';
+                    })
+                    .finally(() => {
+                        submitBtn.disabled = false;
+                    });
+            });
+        </script>
+</body>
+</html>
