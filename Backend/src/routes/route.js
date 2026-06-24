@@ -29,11 +29,11 @@ function buildCrossFloorEdges(graph) {
     // B2 staircase
     // F1.B2.up → F2.B2.up1 → F2.B2.up → F3.B2.up1 → ...
     link(`F${f}_B2.up`,    `F${f+1}_B2.up1`);   // departure → arrival landing next floor
-    link(`F${f}_B2.down`,  `F${f+1}_B2.down1`); // same for down side
+    link(`F${f}_B2.down`,  `F${f-1}_B2.down1`); // same for down side
 
     // B4 staircase — same pattern
     link(`F${f}_B4.up`,    `F${f+1}_B4.up1`);
-    link(`F${f}_B4.down`,  `F${f+1}_B4.down1`);
+    link(`F${f}_B4.down`,  `F${f-1}_B4.down1`);
 
     // Elevator
     link(`F${f}_Elevator`, `F${f+1}_Elevator`);
@@ -74,7 +74,20 @@ function groupByFloor(path) {
 
 router.get('/', async (req, res) => {
   const { from, to } = req.query;
+
+  if (typeof from !== 'string' || typeof to !== 'string') {
+    return res.status(400).json({ error: 'Both "from" and "to" must be strings.' });
+  }
   if (!from || !to) return res.status(400).json({ error: 'Both "from" and "to" are required.' });
+  if (from.length > 80 || to.length > 80) {
+    return res.status(400).json({ error: 'Room names are too long.' });
+  }
+  // Avoid weird input / abuse; allow common room naming patterns.
+  const safeRe = /^[A-Za-z0-9 ._\-()\[\]]+$/;
+  if (!safeRe.test(from) || !safeRe.test(to)) {
+    return res.status(400).json({ error: 'Invalid room name format.' });
+  }
+
 
   try {
     const db     = await getDb();
@@ -107,9 +120,21 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/clear-cache', (_req, res) => {
+function requireApiKey(req) {
+  const expected = process.env.API_KEY;
+  // If API_KEY isn't configured, fail closed to avoid accidental insecure deployment.
+  if (!expected) return false;
+  const provided = req.header('x-api-key');
+  return typeof provided === 'string' && provided === expected;
+}
+
+
+
+router.post('/clear-cache', (req, res) => {
+  if (!requireApiKey(req)) return res.status(401).json({ error: 'Unauthorized' });
   _graphCache = null;
   res.json({ message: 'Cache cleared.' });
 });
+
 
 module.exports = router;
