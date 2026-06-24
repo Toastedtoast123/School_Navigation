@@ -7,7 +7,7 @@
 body{
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
-    background-color: #0d0d0d;
+    background-color: #0D0D0D;
     color: #fff;
 }
 
@@ -644,142 +644,143 @@ nav ul li a:hover::after{
   align-items: center;
 }
 
-@media (max-width: 720px){
-  /* .onboarding-modal{ max-height: 110%; } */
-  .onboarding-interface{ grid-template-columns: 1fr; }
-  .onboarding-footer{ flex-direction: column; align-items: stretch; }
-  .onboarding-footer-right{ width: 100%; justify-content: space-between; }
-  .btn{ width: auto; }
+/* ===================== Responsive ===================== */
+
+/* Tablets and small laptops */
+@media (max-width: 1024px){
+  nav{ width: 92%; }
+  .hero{ padding: 1.5rem; gap: 1.5rem; }
+  .hero-text{ max-width: 100%; }
+  .map{ max-width: 100%; }
 }
 
+/* Tablets / mobile nav breakpoint */
+@media (max-width: 768px){
+  nav{ width: 92%; }
 
+  .hamburger{ display: block; }
 
+  nav ul{
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: min(75vw, 300px);
+    background-color: #0D0D0D;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 1.5rem;
+    padding: 70px 1.5rem 1.5rem;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 10;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.5);
+  }
 
-@media (min-width: 601px) and (max-width: 1279px) {
-    nav ul {
-        gap: 30px; 
-    }
-    nav ul li a {
-        font-size: 18px;
-    }
-    .hero {
-        padding: 1.5rem;
-        gap: 1.5rem;
-    }
-    .hero-text h1 {
-        font-size: clamp(45px, 8vw, 55px);
-    }
-    .features {
-        max-width: 500px;
-        padding: 1.25rem;
-    }
-    .features ul li {
-        font-size: clamp(16px, 3vw, 24px);
-    }
-    .onboarding-modal{
-        width: 90%;
-        max-height: 80%;
-        overflow: scroll;
-        border-radius: 18px;
-        background: linear-gradient(180deg, rgba(18,18,22,0.98), rgba(18,18,22,0.9));
-        border: 1px solid rgba(255,255,255,0.10);
-        box-shadow: 0 26px 60px rgba(0,0,0,0.55);
-        color: var(--text);
+  #menu-toggle:checked ~ ul{
+    transform: translateX(0);
+  }
 
-        transform: translateY(10px) scale(0.99);
-        opacity: 0;
-        transition: transform 260ms ease, opacity 260ms ease;
-    }
+  #menu-toggle:checked ~ ul .close-btn{
+    display: block;
+  }
+
+  nav ul li a{
+    font-size: 18px;
+  }
+
+  .hero{
+    flex-direction: column;
+    padding: 1.25rem;
+    text-align: center;
+  }
+
+  .hero-text{
+    padding: 0;
+    align-items: center;
+  }
+
+  .hero-text h1{
+    padding-top: 10px;
+  }
+
+  .features{
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .features ul li{
+    font-size: 18px;
+  }
+
+  .onboarding-modal{
+    overflow: scroll;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+  }
+
+  .onboarding-interface{
+    grid-template-columns: 1fr;
+  }
+
+  .onboarding-footer{
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .onboarding-footer-right{
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .onboarding-footer-right .btn{
+    flex: 1;
+  }
 }
 
+/* Small phones */
+@media (max-width: 480px){
+  .hero-text h1{
+    font-size: clamp(32px, 9vw, 44px);
+  }
 
-@media (max-width: 600px) {
-    nav {
-        width: 95%;
-    }
-    .container {
-        padding: 0.5rem 0;
-    }
-    .hamburger {
-        display: block;
-    }
-    .close-btn {
-        display: block;
-    }
-    nav ul {
-        flex-direction: column;
-        gap: 20px;
-        position: fixed;
-        top: 0;
-        right: -70%; 
-        width: 70%;
-        height: 100vh;
-        background-color: #27272d;
-        padding: 4rem 1rem 1rem;
-        transition: right 0.3s ease;
-        z-index: 10;
-    }
-    #menu-toggle:checked + .hamburger + ul {
-        right: 0;
-    }
-    nav ul li a {
-        font-size: 18px;
-        padding: 10px 20px;
-    }
-    .hero {
-        flex-direction: column;
-        padding: 1rem;
-        gap: 1rem;
-        min-height: auto;
-    }
-    .hero-text {
-        padding: 0;
-        text-align: center;
-    }
-    .hero-text h1 {
-        font-size: clamp(30px, 12vw, 40px);
-        padding-top: 20px;
-    }
-    .features {
-        max-width: 100%;
-        padding: 1rem;
-        margin-top: 1rem;
-    }
-    .features h3 {
-        font-size: clamp(20px, 5vw, 24px);
-    }
-    .features ul li {
-        font-size: clamp(16px, 4vw, 20px);
-        margin: 0.75rem;
-    }
-    .map {
-        padding: 0;
-        margin-top: 1rem;
-    }
-    .map-illustration {
-        max-height: 50vh;
-    }
-}
+  .features{
+    padding: 1rem;
+  }
 
-@media (min-width: 1280px) {
-    nav ul {
-        gap: 60px; 
-    }
-    nav ul li a {
-        font-size: 22px;
-    }
-    .hero {
-        padding: 3rem;
-        gap: 3rem;
-    }
-    .hero-text h1 {
-        font-size: 65px;
-    }
-    .features {
-        max-width: 600px;
-        padding: 2rem;
-    }
-    .features ul li {
-        font-size: 28px;
-    }
+  .features h3{
+    font-size: 20px;
+  }
+
+  .features ul li{
+    font-size: 16px;
+    margin: 0.75rem 0;
+  }
+
+  .onboarding-header{
+    padding: 14px 14px 8px;
+  }
+
+  .onboarding-progress{
+    padding: 0 14px 10px;
+  }
+
+  .onboarding-body{
+    padding: 4px 14px 8px;
+  }
+
+  .onboarding-footer{
+    padding: 12px 14px 14px;
+  }
+
+  .onboarding-title{
+    font-size: 16px;
+  }
+
+  .onboarding-subtitle{
+    font-size: 12.5px;
+  }
 }
